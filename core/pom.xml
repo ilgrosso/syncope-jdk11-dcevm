@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>net.tirasa.syncope</groupId>
+    <artifactId>syncope-jdk11-dcevm</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <name>Apache Syncope sample project - Core</name>
+  <groupId>net.tirasa.syncope</groupId>
+  <artifactId>syncope-core</artifactId>
+  <packaging>war</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.syncope.core</groupId>
+      <artifactId>syncope-core-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.syncope.core.idm</groupId>
+      <artifactId>syncope-core-idm-rest-cxf</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hotswapagent</groupId>
+      <artifactId>hotswap-agent</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.syncope.client.idm</groupId>
+      <artifactId>syncope-client-idm-lib</artifactId>
+      <version>${syncope.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>syncope</finalName>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <id>set-bundles</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven2-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <container>
+            <containerId>tomcat9x</containerId>
+            <zipUrlInstaller>
+              <url>http://central.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip</url>
+              <downloadDir>${settings.localRepository}/org/codehaus/cargo/cargo-container-archives</downloadDir>
+              <extractDir>${project.build.directory}/cargo/extract</extractDir>
+            </zipUrlInstaller>
+            <dependencies>
+              <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+              </dependency>
+            </dependencies>
+            <timeout>300000</timeout>
+            <log>${cargo.log}</log>
+            <output>${cargo.output}</output> 
+          </container>
+          <configuration>
+            <properties>
+              <cargo.jvmargs>
+                -Dspring.profiles.active=embedded
+                -javaagent:${settings.localRepository}/org/hotswapagent/hotswap-agent/${hotswap.version}/hotswap-agent-${hotswap.version}.jar=autoHotswap=true,disablePlugin=Spring
+                -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
+                -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -Xmx1024m -Xms512m</cargo.jvmargs>
+            </properties>
+          </configuration>
+          <deployables>
+            <deployable>
+              <location>${project.build.directory}/${project.build.finalName}</location>
+              <properties>
+                <context>syncope</context>
+              </properties>
+            </deployable>
+            <deployable>
+              <location>../console/target/syncope-console</location>
+              <properties>
+                <context>syncope-console</context>
+              </properties>
+            </deployable>
+          </deployables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-container</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <skip>${skipTests}</skip>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-container</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+            <configuration>
+              <skip>${skipTests}</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+  </build>
+
+</project>
