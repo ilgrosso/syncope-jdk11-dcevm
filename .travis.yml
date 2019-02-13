@@ -5,7 +5,7 @@ jdk:
 before_install:
   - echo 'MAVEN_OPTS="-Xmx2048M -Xss128M -XX:+CMSClassUnloadingEnabled -XX:+TieredCompilation -XX:TieredStopAtLevel=1"' >~/.mavenrc
 # default install is mvn install --quiet -DskipTests=true
-install: travis_wait 30 mvn --show-version --quiet clean install
+install: mvn --show-version --quiet clean install
 before_script:
   - cd core
 script:
