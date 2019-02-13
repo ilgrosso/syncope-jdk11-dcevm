@@ -4,7 +4,8 @@ language: java
 #  - openjdk11
 before_install:
   - wget https://github.com/TravaOpenJDK/trava-jdk-11-dcevm/releases/download/dcevm-11.0.1%2B8/java11-openjdk-dcevm-linux.tar.gz -O /tmp/jdk.tar.gz
-  - tar -xf /tmp/jdk.tar.gz -C /tmp
+  - cd /tmp
+  - tar xf jdk.tar.gz
   - export PATH=/tmp/jdk/bin/:$PATH
   - export JAVA_HOME=/tmp/jdk
   - echo $PATH
