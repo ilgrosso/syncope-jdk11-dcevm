@@ -48,11 +48,6 @@ under the License.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.hotswapagent</groupId>
-      <artifactId>hotswap-agent</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.syncope.client.idm</groupId>
       <artifactId>syncope-client-idm-lib</artifactId>
       <version>${syncope.version}</version>
@@ -85,6 +80,20 @@ under the License.
       </plugin>
       
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven2-plugin</artifactId>
         <inherited>true</inherited>
@@ -110,7 +119,7 @@ under the License.
             <properties>
               <cargo.jvmargs>
                 -Dspring.profiles.active=embedded
-                -javaagent:${settings.localRepository}/org/hotswapagent/hotswap-agent/${hotswap.version}/hotswap-agent-${hotswap.version}.jar=autoHotswap=true,disablePlugin=Spring
+                -javaagent:${java.home}/lib/hotswap/hotswap-agent.jar=autoHotswap=true,disablePlugin=Spring
                 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
                 -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -Xmx1024m -Xms512m</cargo.jvmargs>
             </properties>
@@ -120,12 +129,6 @@ under the License.
               <location>${project.build.directory}/${project.build.finalName}</location>
               <properties>
                 <context>syncope</context>
-              </properties>
-            </deployable>
-            <deployable>
-              <location>../console/target/syncope-console</location>
-              <properties>
-                <context>syncope-console</context>
               </properties>
             </deployable>
           </deployables>

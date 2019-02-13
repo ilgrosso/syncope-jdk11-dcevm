@@ -1,11 +1,17 @@
 sudo: false
 language: java
-jdk:
-  - openjdk11
+#jdk:
+#  - openjdk11
 before_install:
+  - wget https://github.com/TravaOpenJDK/trava-jdk-11-dcevm/releases/download/dcevm-11.0.1%2B8/java11-openjdk-dcevm-linux.tar.gz -O /tmp/jdk.tar.gz
+  - tar -xf /tmp/jdk.tar.gz -C /tmp
+  - export PATH=/tmp/jdk/bin/:$PATH
+  - export JAVA_HOME=/tmp/jdk
+  - echo $PATH
+  - echo $JAVA_HOME
   - echo 'MAVEN_OPTS="-Xmx2048M -Xss128M -XX:+CMSClassUnloadingEnabled -XX:+TieredCompilation -XX:TieredStopAtLevel=1"' >~/.mavenrc
 # default install is mvn install --quiet -DskipTests=true
-install: mvn --show-version --quiet clean install
+install: mvn --show-version --quiet clean install -DskipTests
 before_script:
   - cd core
 script:
